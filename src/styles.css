@@ -1,0 +1,104 @@
+/* === Base page styling === */
+:root {
+  --bg: #0f172a;          /* page background */
+  --panel: #111827;       /* board background */
+  --cell: #1f2937;        /* cell background */
+  --cell-border: #334155; /* grid line color */
+  --cell-hover: #374151;  /* hover color */
+  --accent: #22d3ee;      /* friendly accent (ship) */
+  --hit: #ef4444;         /* hit color */
+  --miss: #94a3b8;        /* miss color */
+  --blocked: #f59e0b;     /* invalid placement */
+  --text: #e5e7eb;        /* primary text */
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 50% -20%, #172554 0%, var(--bg) 60%);
+  display: grid;
+  place-content: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.content{
+    display: flex;
+    flex-direction: row;
+}
+/* Optional container if you render two boards side-by-side */
+.boards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+/* === Board === */
+.board {
+  background: var(--panel);
+  padding: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px; /* grid lines */
+  width: min(90vmin, 520px);     /* responsive width */
+  aspect-ratio: 1 / 1;           /* keep square overall */
+}
+
+/* === Cells === */
+.box {
+  background: var(--cell);
+  border: 1px solid var(--cell-border);
+  border-radius: 6px;
+  aspect-ratio: 1 / 1;           /* perfect squares */
+  display: grid;
+  place-items: center;
+  user-select: none;
+  transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+/* Hover/focus (e.g., for targetable enemy cells) */
+.box:hover,
+.box:focus-visible {
+  background: var(--cell-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+  outline: none;
+}
+
+/* Clickable state (e.g., enemy board) */
+.board.enemy .box { cursor: pointer; }
+
+/* === Status helpers you can toggle from JS === */
+.box.ship { 
+  background: color-mix(in oklab, var(--cell) 70%, var(--accent));
+  border-color: color-mix(in oklab, var(--cell-border) 60%, var(--accent));
+}
+
+.box.hit {
+  background: color-mix(in oklab, var(--cell) 50%, var(--hit));
+  border-color: var(--hit);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+.box.miss {
+  background: color-mix(in oklab, var(--cell) 70%, var(--miss));
+  border-style: dashed;
+}
+
+.box.blocked { /* for invalid placement preview */
+  background: color-mix(in oklab, var(--cell) 60%, var(--blocked));
+  border-color: var(--blocked);
+}
+
+/* Optional small label number */
+.box .label {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

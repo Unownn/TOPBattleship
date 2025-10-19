@@ -1,6 +1,7 @@
 import "./styles.css";
 import { Player } from "./models/player.js";
 import { Ship } from "./models/ship.js";
+import { UIRenderer } from "./ui/UIRenderer.js";
 
 function gen(){
   const s1 = new Ship(2);
@@ -18,8 +19,8 @@ function gen(){
     p1.board.placeShip(ships[i], placement[i]);
     p2.board.placeShip(ships[i], placement[i]);
   }
-  console.log(p1);
-  console.log(p2);
+  const ui1 = new UIRenderer(p1);
+  const ui2 = new UIRenderer(p2);
 }
 
 gen();
