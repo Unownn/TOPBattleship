@@ -1,10 +1,19 @@
-export class UIRenderer{
-    constructor(player){
-        this.player = player;
-        this.playerboardUI(this.player.board);
-    }
+import { Player } from "../models/player.js";
+import { GameLogic } from "../game/game.js";
 
-    playerboardUI(playerBoard) {
+export class UIRenderer{
+    constructor(subject){
+        if(subject instanceof GameLogic){
+            this.logic = subject;
+            return;
+        }
+        else{
+            console.error("Can only pass GameLogic object ass a constructor");
+            
+        }
+    }
+    // Render board of the given player
+    playerboardUI(player) {
         // Board div
         const board = document.createElement("div");
         board.className = "board";
@@ -19,8 +28,8 @@ export class UIRenderer{
                 box.dataset.y = j;
 
                 // Change class of the box. Hide NPC board ships
-                if(this.player.player == true){
-                    this.changeClass(playerBoard, [i, j], box);
+                if(player?.player == true){
+                    this.changeClass(player.board, [i, j], box);
                 }
                 
                 board.appendChild(box);
@@ -37,21 +46,36 @@ export class UIRenderer{
             const cell = e.target.closest('.box');
             if (!cell) return;
 
+            // Avoid hitting duplicates
+            if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+
+            // Check whos turn before going further
+            if(!(this.logic.turn == player.player)) return;
+            else{
+                this.logic.turnLogic();
+            }
+
             // Get cell coordinates and mark it as hit/miss
             const x = Number(cell.dataset.x);
             const y = Number(cell.dataset.y);
-            this.player.board.receiveAttack([x, y]);
-            this.changeClass(this.player.board, [x, y], cell);
+
+            // receiveAttack returns true/false
+            if(player.board.receiveAttack([x, y])){
+                this.changeClass(player.board, [x, y], cell);
+            }
 
             // Check game state
-            const allShipsHit = [...this.player.board.shipAt].every(key => this.player.board.hitBoxes.has(key));
+            const allShipsHit = [...player.board.shipAt].every(key => player.board.hitBoxes.has(key));
             if(allShipsHit){
-                console.log(`${this.player} won!`);
+                console.log(`${player} won!`);
+                this.gameOver(player);
             }
         });
     }
 
+    // Change class of given box, indicators for whats where
     changeClass(boardSet, xy, box){
+        box.classList.remove("ship","hit","miss");
         // If a coordinate is hit and has a ship
         if(boardSet.hitBoxes.has(toKey(xy)) && boardSet.shipAt.has(toKey(xy))){
             box.classList.add("hit");
@@ -67,6 +91,46 @@ export class UIRenderer{
             box.classList.add("miss");
             return;
         }
+    }
+
+    // Load the main menu
+    loadMainMenu(){
+        this.clearWindow();
+        
+        const content = document.getElementById("content");
+        let btn = document.createElement("button");
+        btn.innerHTML = "Start Game";
+        btn.className = "mainmenubtn";
+
+        btn.addEventListener('click', () => {
+            this.logic.createPlayer();
+        });
+        content.appendChild(btn);
+    }
+
+    gameOver(player){
+        this.clearWindow();
+        
+        const content = document.getElementById("content");
+
+        let wintext = document.createElement("div");
+        wintext.innerHTML = `${player} WON`;
+
+        let btn = document.createElement("button");
+        btn.innerHTML = "Main Menu";
+        btn.className = "mainmenubtn";
+
+        btn.addEventListener('click', () => {
+            this.logic.mainMenu();
+        });
+        content.appendChild(wintext);
+        content.appendChild(btn);
+    }
+
+    // Helper to clear out the content div
+    clearWindow(){
+        const content = document.getElementById("content");
+        content.innerHTML = "";
     }
 }
 
