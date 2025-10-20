@@ -1,4 +1,3 @@
-import { Player } from "../models/player.js";
 import { GameLogic } from "../game/game.js";
 
 export class UIRenderer{
